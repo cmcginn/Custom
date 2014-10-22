@@ -7,6 +7,7 @@ using CMS.DataProviderSQL;
 using CMS.Ecommerce;
 using Paymentech.Tests.Gateway;
 using Paymentech.Tests.Helpers;
+using CMSCustom.revolutiongolf.ecommerce.paymentech.Providers;
 
 namespace Paymentech.Tests
 {
@@ -33,16 +34,54 @@ namespace Paymentech.Tests
 
 
         }
+        [TestMethod]
+        public void CreateProfileTest()
+        {
+            var target = new PaymentechGatewayProvider();
+            target.TestOrderInfo = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
+            var actual = target.CreateProfile();
+            target.SaveProfile(actual);
+        }
+        [TestMethod]
+        public void GetProfileTest()
+        {
+            var target = new PaymentechGatewayProvider();
+            target.TestOrderInfo = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
+            var actual = target.GetCustomerPaymentProfiles();
+            Assert.IsTrue(actual.Any());
+        }
 
         [TestMethod]
         public void ProcessPaymentTest()
         {
             var target = new PaymentechGatewayProvider();
             target.TestOrderInfo = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
-            var actual = target.MapProfileAddElement();
-            Assert.IsNotNull(actual);
-            //target.ProcessPayment();
+            target.ProcessPaymentForOrder();
+            Assert.IsTrue(target.TestOrderInfo.OrderStatusID == 3);
         }
 
+        //[TestMethod]
+        //public void MapNewOrderRequestTest()
+        //{
+        //    var target = new PaymentechGatewayProvider();
+        //    target.TestOrderInfo = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
+        //    var actual = target.MapNewOrderRequestElement();
+        //    Assert.IsNotNull(actual);
+        //}
+
+        //[TestMethod]
+        //public void ProcessPaymentForOrderTest()
+        //{
+        //    var target = new PaymentechGatewayProvider();
+        //    target.TestOrderInfo = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
+        //    target.ProcessPaymentForOrder();
+        //}
+        //[TestMethod]
+        //public void InsertCustomerProfile()
+        //{
+        //    var target = new PaymentechProfileProvider();
+        //    var c = OrderInfoProvider.GetOrderInfo(TestHelper.GetWellKnownOrderId());
+        //    target.InsertPaymentProfile(c.OrderCustomerID, 11111111);
+        //}
     }
 }

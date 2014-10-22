@@ -39,6 +39,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.Base.dll</HintPath>
     </Reference>
+    <Reference Include="CMS.CustomTables, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\CMS.CustomTables.dll</HintPath>
+    </Reference>
     <Reference Include="CMS.DataEngine, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.DataEngine.dll</HintPath>
@@ -70,6 +74,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -90,6 +95,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Gateway\PaymentechGatewayProvider.cs" />
+    <Compile Include="Gateway\PaymentechProfileProvider.cs" />
     <Compile Include="Helpers\TestHelper.cs" />
     <Compile Include="Mocks\PaymentechSettingsMock.cs" />
     <Compile Include="PaymentechGatewayProviderTests.cs" />
@@ -220,6 +226,12 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CMS\CMSCustom.csproj">
+      <Project>{e38494bf-4436-46e3-862c-f7707bf847c5}</Project>
+      <Name>CMSCustom</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
