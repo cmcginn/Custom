@@ -36,6 +36,11 @@ namespace Paymentech.Tests.Gateway
             result.ExpirationDate = "022015";
             return result;
         }
+
+        protected virtual ProfileResponse CreateRecurringCustomerProfile(RecurringCustomerProfile recurringProfile)
+        {
+            var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+        }
         protected virtual ProfileResponse CreateCustomerProfile(CustomerProfile profile)
         {
             var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
@@ -85,7 +90,20 @@ namespace Paymentech.Tests.Gateway
             }
             return result;
         }
-
+        protected virtual RecurringCustomerProfile MapProfileRecurringInfo(CustomerInfo customerInfo, OrderInfo orderInfo,ShoppingCartItemInfo recurringShoppingCartItemInfo)
+        {
+            var custProfile = MapCustomerProfile(customerInfo, orderInfo);
+            var result = new RecurringCustomerProfile();
+            result.BillingAddressInfo = custProfile.BillingAddressInfo;
+            result.CardInfo = custProfile.CardInfo;
+            result.EmailAddress = custProfile.EmailAddress;
+            result.MerchantId = _paymentechGatewaySettings.RecurringMerchantId; 
+            result.RecurringAmount = recurringShoppingCartItemInfo.TotalPrice;
+            //TODO: Figure this out
+            result.RecurringFrequency = RecurringFrequency.Monthly;
+            result.StartDate = System.DateTime.UtcNow.AddDays(1);
+            return result;
+        }
         protected virtual PaymentechProfileItem MapPaymentechProfileItem(CustomerProfile profile, int customerID)
         {
             var result = new PaymentechProfileItem();
