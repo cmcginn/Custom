@@ -25,6 +25,19 @@ namespace Paymentech.Tests.Helpers
 
             return builder.ToString();
         }
+
+        public static ShoppingCartInfo CreateShoppingCartInfo(OrderInfo orderInfo)
+        {
+            var original =  ShoppingCartInfoProvider.GetShoppingCartInfoFromOrder(orderInfo.OrderID);
+            var cartInfo = new ShoppingCartInfo();
+            original.CartItems.ForEach(x=>{
+
+                ShoppingCartInfoProvider.AddShoppingCartItem(cartInfo, x);
+            
+            });
+            return cartInfo;
+
+        }
         public static OrderInfo CreateOrder(int customerId, int addressId,double total, double tax,double shipping)
         {
             // Get the customer
@@ -151,7 +164,7 @@ namespace Paymentech.Tests.Helpers
 
         public static int GetWellKnownOrderId()
         {
-            return 256;
+            return 257;
         }
 
         

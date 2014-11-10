@@ -39,6 +39,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.Base.dll</HintPath>
     </Reference>
+    <Reference Include="CMS.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\CMS.Core.dll</HintPath>
+    </Reference>
     <Reference Include="CMS.CustomTables, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.CustomTables.dll</HintPath>
@@ -64,6 +68,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.Globalization.dll</HintPath>
     </Reference>
+    <Reference Include="CMS.Helpers, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\CMS.Helpers.dll</HintPath>
+    </Reference>
     <Reference Include="CMS.Membership, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.Membership.dll</HintPath>
@@ -71,6 +79,9 @@
     <Reference Include="CMS.SiteProvider, Version=8.0.0.0, Culture=neutral, PublicKeyToken=834b12a258f213f9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.SiteProvider.dll</HintPath>
+    </Reference>
+    <Reference Include="PaymentechGateway.Provider">
+      <HintPath>..\..\..\..\cmcginn\PaymentechGateway\PaymentechGateway.Provider\bin\Debug\PaymentechGateway.Provider.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -95,7 +106,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Gateway\PaymentechGatewayProvider.cs" />
+    <Compile Include="Gateway\PaymentechGatewayProvider_Old.cs" />
+    <Compile Include="Gateway\PaymentechProfileItem.Generated.cs" />
     <Compile Include="Gateway\PaymentechProfileProvider.cs" />
+    <Compile Include="Gateway\PaymentechProfileProvider_Old.cs" />
+    <Compile Include="Gateway\PaymentechTransactionItem.Generated.cs" />
+    <Compile Include="Gateway\PaymentechTransactionProvider.cs" />
+    <Compile Include="Gateway\TestablePaymentechGatewayProvider.cs" />
     <Compile Include="Helpers\TestHelper.cs" />
     <Compile Include="Mocks\PaymentechSettingsMock.cs" />
     <Compile Include="PaymentechGatewayProviderTests.cs" />
