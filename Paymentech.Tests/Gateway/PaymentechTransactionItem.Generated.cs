@@ -42,6 +42,23 @@ namespace CMS.CustomTables.Types
         /// 
         /// </summary>
         [DatabaseField]
+        public string GatewayOrderID
+        {
+            get
+            {
+                return ValidationHelper.GetString(GetValue("GatewayOrderID"), "");
+            }
+            set
+            {
+                SetValue("GatewayOrderID", value);
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DatabaseField]
         public string HostResponseCode
         {
             get

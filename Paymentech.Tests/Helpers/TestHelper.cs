@@ -48,7 +48,7 @@ namespace Paymentech.Tests.Helpers
             OrderAddressInfo orderShippingAddress = null;
 
             // Get the customer address
-            AddressInfo customerAddress = AddressInfoProvider.GetAddressInfo(addressId);
+            OrderAddressInfo customerAddress = OrderAddressInfoProvider.GetAddressInfo(addressId);
 
             if (customerAddress != null)
             {

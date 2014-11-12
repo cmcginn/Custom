@@ -8,10 +8,11 @@ using PaymentechGateway.Provider;
 using CMS.Ecommerce;
 using CMS.Globalization;
 using CMS.CustomTables.Types;
+using System.Globalization;
 
 namespace Paymentech.Tests.Gateway
 {
-    public class PaymentechGatewayProvider: CMSPaymentGatewayProvider
+    public class PaymentechGatewayProvider : CMSPaymentGatewayProvider
     {
 
         public override void ProcessPayment()
@@ -19,10 +20,41 @@ namespace Paymentech.Tests.Gateway
             base.ProcessPayment();
         }
         #region Class Methods
+        protected virtual OrderResponse CreateNewOrder(CustomerInfo customerInfo, OrderInfo orderInfo, PaymentechProfileItem paymentProfile)
+        {
+            var request = MapNewOrderRequest(paymentProfile, orderInfo);
+            var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+            var result = facade.ProcessNewOrderPayment(request);
+            InsertPaymentechTransactionItem(customerInfo, orderInfo, result,paymentProfile);
+            return result;
+        }
         protected virtual void InsertPaymentechProfileItem(PaymentechProfileItem paymentechProfile)
         {
             var profileProvider = new PaymentechProfileProvider();
             profileProvider.InsertPaymentechProfileItem(paymentechProfile);
+        }
+        protected virtual void InsertPaymentechTransactionItem(CustomerInfo customerInfo, OrderInfo orderInfo, OrderResponse orderResponse,PaymentechProfileItem profile)
+        {
+            
+            var transaction = new PaymentechTransactionItem
+            {
+                AuthorizationCode = orderResponse.TransactionRefNum,
+                CustomerID = customerInfo.CustomerID,
+                HostResponseCode = orderResponse.HostResponseCode,
+                IsSuccess = orderResponse.Success,
+                MerchantID = long.Parse(orderResponse.MerchantId),
+                OrderID = orderInfo.OrderID,
+                ItemOrder=0,
+                PaymentProfileID = profile.ItemID,
+                GatewayOrderID = orderResponse.GatewayOrderId,
+                TransactionReference = orderResponse.TransactionRefNum,
+                ProcStatusMessage = orderResponse.ProcStatusMessage,
+                TransactionType = orderResponse.TransactionType
+
+            };
+            var provider = new PaymentechTransactionProvider();
+            provider.InsertCustomerTransaction(transaction);
+          
         }
         #endregion
         #region Mapping
@@ -37,24 +69,33 @@ namespace Paymentech.Tests.Gateway
             return result;
         }
 
+        //protected virtual 
+        protected virtual List<PaymentechProfileItem> GetCustomerPaymentProfiles(CustomerInfo customerInfo)
+        {
+            var provider = new PaymentechProfileProvider();
+            var result = provider.GetCustomerPaymentProfiles(customerInfo);
+            return result;
+        }
         protected virtual ProfileResponse CreateRecurringCustomerProfile(RecurringCustomerProfile recurringProfile)
         {
             var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+            var response = facade.CreatePaymentechRecurringProfile(recurringProfile);
+            return response;
         }
         protected virtual ProfileResponse CreateCustomerProfile(CustomerProfile profile)
         {
             var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
             var result = facade.CreatePaymentechProfile(profile);
-            if(result.Success)
+            if (result.Success)
             {
-          
-                    profile.BillingAddressInfo = result.BillingAddressInfo;
-                    profile.CardInfo = result.CardInfo;
-                    profile.MerchantId = result.MerchantId;
-                    profile.CustomerRefNum = result.CustomerRefNum;
-                    profile.EmailAddress = result.EmailAddress;
-                    
-               
+
+                profile.BillingAddressInfo = result.BillingAddressInfo;
+                profile.CardInfo = result.CardInfo;
+                profile.MerchantId = result.MerchantId;
+                profile.CustomerRefNum = result.CustomerRefNum;
+                profile.EmailAddress = result.EmailAddress;
+
+
                 var pp = MapPaymentechProfileItem(profile, GetOrderInfo().OrderCustomerID);
                 InsertPaymentechProfileItem(pp);
             }
@@ -64,43 +105,44 @@ namespace Paymentech.Tests.Gateway
         {
 
             var result = new CustomerProfile();
-            
+
             result.CardInfo = MapCustomerCardInfo();
             result.EmailAddress = customerInfo.CustomerEmail;
-            
-            if(orderInfo.OrderBillingAddress != null)
+
+            if (orderInfo.OrderBillingAddress != null)
             {
                 result.BillingAddressInfo = new BillingAddressInfo();
                 result.BillingAddressInfo.Address1 = orderInfo.OrderBillingAddress.AddressLine1;
                 result.BillingAddressInfo.Address2 = orderInfo.OrderBillingAddress.AddressLine2;
                 result.BillingAddressInfo.City = orderInfo.OrderBillingAddress.AddressCity;
                 var countryInfo = CountryInfoProvider.GetCountryInfo(orderInfo.OrderBillingAddress.AddressCountryID);
-                if(countryInfo != null)                
+                if (countryInfo != null)
                     result.BillingAddressInfo.Country = countryInfo.CountryTwoLetterCode;
-                
+
                 var stateProvince = StateInfoProvider.GetStateInfo(orderInfo.OrderBillingAddress.AddressStateID);
                 if (stateProvince != null)
                     result.BillingAddressInfo.StateProvince = stateProvince.StateCode;
                 result.BillingAddressInfo.PhoneNumber = orderInfo.OrderBillingAddress.AddressPhone;
                 result.BillingAddressInfo.PostalCode = orderInfo.OrderBillingAddress.AddressZip;
                 result.BillingAddressInfo.BillingAddressName = orderInfo.OrderBillingAddress.AddressPersonalName;
-                
-                
+
+
 
             }
             return result;
         }
-        protected virtual RecurringCustomerProfile MapProfileRecurringInfo(CustomerInfo customerInfo, OrderInfo orderInfo,ShoppingCartItemInfo recurringShoppingCartItemInfo)
+        protected virtual RecurringCustomerProfile MapProfileRecurringInfo(CustomerInfo customerInfo, OrderInfo orderInfo, ShoppingCartItemInfo recurringShoppingCartItemInfo)
         {
             var custProfile = MapCustomerProfile(customerInfo, orderInfo);
             var result = new RecurringCustomerProfile();
             result.BillingAddressInfo = custProfile.BillingAddressInfo;
             result.CardInfo = custProfile.CardInfo;
             result.EmailAddress = custProfile.EmailAddress;
-            result.MerchantId = _paymentechGatewaySettings.RecurringMerchantId; 
-            result.RecurringAmount = recurringShoppingCartItemInfo.TotalPrice;
+            result.MerchantId = PaymentechGatewaySettings.RecurringMerchantId;
+
             //TODO: Figure this out
             result.RecurringFrequency = RecurringFrequency.Monthly;
+            result.RecurringAmount = 10.00d;
             result.StartDate = System.DateTime.UtcNow.AddDays(1);
             return result;
         }
@@ -116,7 +158,19 @@ namespace Paymentech.Tests.Gateway
             result.MerchantID = long.Parse(profile.MerchantId);
             result.CustomerID = customerID;
             result.LastTransactionUtc = System.DateTime.UtcNow;
-            result.IsRecurring = profile.MerchantId == _paymentechGatewaySettings.RecurringMerchantId;
+            result.IsRecurring = profile.MerchantId == PaymentechGatewaySettings.RecurringMerchantId;
+            return result;
+        }
+
+        protected virtual OrderRequest MapNewOrderRequest(PaymentechProfileItem paymentProfile,OrderInfo orderInfo)
+        {
+            var result = new OrderRequest();
+            result.CustomerRefNum = paymentProfile.CustomerRefNum.ToString(CultureInfo.InvariantCulture);
+            result.GatewayOrderId = CreateGatewayOrderId(orderInfo);
+            result.OrderShipping = orderInfo.OrderTotalShipping;
+            result.OrderTax = orderInfo.OrderTotalTax;
+            result.TransactionTotal = orderInfo.OrderTotalPrice;
+            result.ShippingRequired = GetShippingRequired(orderInfo);
             return result;
         }
         #endregion
@@ -127,7 +181,7 @@ namespace Paymentech.Tests.Gateway
         {
             get
             {
-                if(_paymentechGatewaySettings == null)
+                if (_paymentechGatewaySettings == null)
                 {
                     _paymentechGatewaySettings = new PaymentechGatewaySettings
                     {
@@ -144,7 +198,7 @@ namespace Paymentech.Tests.Gateway
                         UseSandbox = true
 
                     };
-                    
+
                 }
                 return _paymentechGatewaySettings;
             }
@@ -160,11 +214,18 @@ namespace Paymentech.Tests.Gateway
         {
             return this.mOrder;
         }
-
-        //protected virtual PaymentechGatewaySettings GetSettings()
-        //{
-        //    var result
-        //}
+        protected virtual string CreateGatewayOrderId(OrderInfo orderInfo)
+        {
+            return orderInfo.OrderGUID.ToString().Replace("-", "").Substring(0, 22);
+        }
+        public bool GetShippingRequired(OrderInfo orderInfo)
+        {
+            var result = false;
+            var orderItemInfos = OrderItemInfoProvider.GetOrderItems(orderInfo.OrderID);
+            result = orderItemInfos.Any(x => x.OrderItemSKU.SKUNeedsShipping);
+            return result;
+        }
+ 
         #endregion
     }
 }
