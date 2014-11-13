@@ -76,15 +76,15 @@ namespace CMS.CustomTables.Types
         /// 
         /// </summary>
         [DatabaseField]
-        public bool IsRecurring
+        public int RecurringOrderItemID
         {
             get
             {
-                return ValidationHelper.GetBoolean(GetValue("IsRecurring"), false);
+                return ValidationHelper.GetInteger(GetValue("RecurringOrderItemID"), 0);
             }
             set
             {
-                SetValue("IsRecurring", value);
+                SetValue("RecurringOrderItemID", value);
             }
         }
 

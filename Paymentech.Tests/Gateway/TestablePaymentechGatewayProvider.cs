@@ -12,13 +12,21 @@ namespace Paymentech.Tests.Gateway
     public class TestablePaymentechGatewayProvider:PaymentechGatewayProvider
     {
         public OrderInfo Order { get; set; }
+        List<OrderItemInfo> _recurringItems;
+        public List<OrderItemInfo> RecurringItems
+        {
+            get
+            {
+                return _recurringItems ?? (_recurringItems = new List<OrderItemInfo>());
+            }
+        }
         public CustomerProfile MapCustomerProfileAccessor(CustomerInfo customerInfo, OrderInfo orderInfo)
         {
             return this.MapCustomerProfile(customerInfo, orderInfo);
         }
-        public RecurringCustomerProfile MapProfileRecurringInfoAccessor(CustomerInfo customerInfo, OrderInfo orderInfo,ShoppingCartItemInfo recurringShoppingCartItemInfo)
+        public RecurringCustomerProfile MapProfileRecurringInfoAccessor(CustomerInfo customerInfo, OrderInfo orderInfo,OrderItemInfo orderItemInfo)
         {
-            return this.MapProfileRecurringInfo(customerInfo, orderInfo, recurringShoppingCartItemInfo);
+            return this.MapProfileRecurringInfo(customerInfo, orderInfo, orderItemInfo);
         }
         public ProfileResponse CreateCustomerProfileAccessor(CustomerProfile profile)
         {
@@ -29,9 +37,9 @@ namespace Paymentech.Tests.Gateway
             return this.GetCustomerPaymentProfiles(customerInfo);
         }
 
-        public ProfileResponse CreateRecurringCustomerProfileAccessor(RecurringCustomerProfile recurringProfile)
+        public ProfileResponse CreateRecurringCustomerProfileAccessor(RecurringCustomerProfile recurringProfile, OrderItemInfo recurringOrderItem)
         {
-            return this.CreateRecurringCustomerProfile(recurringProfile);
+            return this.CreateRecurringCustomerProfile(recurringProfile,recurringOrderItem);
         }
         protected override OrderInfo GetOrderInfo()
         {
@@ -56,6 +64,10 @@ namespace Paymentech.Tests.Gateway
         public ProfileResponse FetchCustomerProfileAccessor(PaymentechProfileItem paymentechProfile)
         {
             return this.FetchCustomerProfile(paymentechProfile);
+        }
+        protected override List<OrderItemInfo> GetRecurringOrderItems(OrderInfo orderInfo)
+        {
+            return RecurringItems;
         }
     }
 }

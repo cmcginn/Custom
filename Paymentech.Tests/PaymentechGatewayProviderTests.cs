@@ -53,15 +53,7 @@ namespace Paymentech.Tests
             var result = profiles.Single(x => x.ItemID == 12);
             return result;
         }
-        //public RecurringCustomerProfile GetRecurringProfile()
-        //{
-        //    var result = new RecurringCustomerProfile();
-        //    var customerInfo = GetWellknownCustomerInfo();
-        //    var orderInfo = GetWellknownOrderInfo();
-        //    var shoppingCartItemInfo = new ShoppingCartItemInfo();
-        //    shoppingCartItemInfo.TotalPrice = 10.00d;
 
-        //}
         [TestMethod]
         public void NewOrderSetup()
         {
@@ -140,10 +132,9 @@ namespace Paymentech.Tests
             //var result = new RecurringCustomerProfile();
             var customerInfo = GetWellknownCustomerInfo();
             var orderInfo = CreateNewOrderInfo();
-            var shoppingCartItemInfo = new ShoppingCartItemInfo();
-            shoppingCartItemInfo.SetValue("TotalPrice", 10.00d);
-            var profile = target.MapProfileRecurringInfoAccessor(customerInfo, orderInfo, shoppingCartItemInfo);
-            var actual = target.CreateRecurringCustomerProfileAccessor(profile);
+            var orderItemInfo = new OrderItemInfo();          
+            var profile = target.MapProfileRecurringInfoAccessor(customerInfo, orderInfo, orderItemInfo);
+            var actual = target.CreateRecurringCustomerProfileAccessor(profile,orderItemInfo);
             Assert.IsTrue(actual.Success);
         }
         [TestMethod]
@@ -203,5 +194,32 @@ namespace Paymentech.Tests
             Assert.IsTrue(voidTransaction.GatewayOrderID == orderTxn.GatewayOrderID, "2");
 
         }
+
+        #region Process Payment Tests
+        [TestMethod]
+        public void ProcessPaymentTest_WhenSingle_RecurringItem()
+        {
+            var target = GetTarget();
+            var order = CreateNewOrderInfo();
+
+            OrderItemInfo newItem = new OrderItemInfo
+            {
+                OrderItemSKUName = "Recurring Subscription",
+                OrderItemOrderID = order.OrderID,
+                OrderItemSKUID = 142,
+                OrderItemUnitPrice = 39.99,
+                OrderItemUnitCount = 1
+            };
+
+            // Create the order item
+            OrderItemInfoProvider.SetOrderItemInfo(newItem);
+            target.RecurringItems.Add(newItem);
+            var orderItems = OrderItemInfoProvider.GetOrderItems(order.OrderID);
+            Assert.IsTrue(orderItems.Any());
+            target.Order = order;
+            target.ProcessPayment();
+            
+        }
+        #endregion
     }
 }

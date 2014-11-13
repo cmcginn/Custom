@@ -17,9 +17,26 @@ namespace Paymentech.Tests.Gateway
 
         public override void ProcessPayment()
         {
-            base.ProcessPayment();
+            var orderInfo = GetOrderInfo();
+            var customerInfo = CustomerInfoProvider.GetCustomerInfo(orderInfo.OrderCustomerID);
+            ProcessRecurringItems(customerInfo, orderInfo);
+            
+
+            //base.ProcessPayment();
         }
         #region Class Methods
+
+        protected void ProcessRecurringItems(CustomerInfo customerInfo,OrderInfo orderInfo)
+        {
+            var recurringItems = GetRecurringOrderItems(orderInfo);
+            recurringItems.ForEach(item => ProcessRecurringItem(customerInfo, orderInfo, item));
+        }
+        protected void ProcessRecurringItem(CustomerInfo customerInfo,OrderInfo orderInfo, OrderItemInfo recurringItem)
+        {
+            var request = MapProfileRecurringInfo(customerInfo,orderInfo,recurringItem);
+            var response = CreateRecurringCustomerProfile(request,recurringItem);
+
+        }
         protected virtual OrderResponse CreateNewOrder(CustomerInfo customerInfo, OrderInfo orderInfo, PaymentechProfileItem paymentProfile)
         {
             var request = MapNewOrderRequest(paymentProfile, orderInfo);
@@ -120,10 +137,21 @@ namespace Paymentech.Tests.Gateway
             var result = provider.GetCustomerPaymentProfiles(customerInfo);
             return result;
         }
-        protected virtual ProfileResponse CreateRecurringCustomerProfile(RecurringCustomerProfile recurringProfile)
+        protected virtual ProfileResponse CreateRecurringCustomerProfile(RecurringCustomerProfile recurringProfile,OrderItemInfo recurringOrderItem)
         {
             var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
             var response = facade.CreatePaymentechRecurringProfile(recurringProfile);
+            if (response.Success)
+            {
+
+                recurringProfile.BillingAddressInfo = response.BillingAddressInfo;
+                recurringProfile.CardInfo = response.CardInfo;
+                recurringProfile.MerchantId = response.MerchantId;
+                recurringProfile.CustomerRefNum = response.CustomerRefNum;
+                recurringProfile.EmailAddress = response.EmailAddress;
+            }
+            var profile = MapPaymentechProfileItem(recurringProfile,GetOrderInfo().OrderCustomerID,recurringOrderItem.OrderItemID);
+            InsertPaymentechProfileItem(profile);
             return response;
         }
         protected virtual ProfileResponse CreateCustomerProfile(CustomerProfile profile)
@@ -183,7 +211,7 @@ namespace Paymentech.Tests.Gateway
             }
             return result;
         }
-        protected virtual RecurringCustomerProfile MapProfileRecurringInfo(CustomerInfo customerInfo, OrderInfo orderInfo, ShoppingCartItemInfo recurringShoppingCartItemInfo)
+        protected virtual RecurringCustomerProfile MapProfileRecurringInfo(CustomerInfo customerInfo, OrderInfo orderInfo, OrderItemInfo recurringOrderItemInfo)
         {
             var custProfile = MapCustomerProfile(customerInfo, orderInfo);
             var result = new RecurringCustomerProfile();
@@ -194,11 +222,11 @@ namespace Paymentech.Tests.Gateway
 
             //TODO: Figure this out
             result.RecurringFrequency = RecurringFrequency.Monthly;
-            result.RecurringAmount = 10.00d;
+            result.RecurringAmount = recurringOrderItemInfo.OrderItemUnitPrice;
             result.StartDate = System.DateTime.UtcNow.AddDays(1);
             return result;
         }
-        protected virtual PaymentechProfileItem MapPaymentechProfileItem(CustomerProfile profile, int customerID)
+        protected virtual PaymentechProfileItem MapPaymentechProfileItem(CustomerProfile profile, int customerID,int? recurringOrderItemID=null)
         {
             var result = new PaymentechProfileItem();
             result.CardBrand = profile.CardInfo.CardBrand;
@@ -210,7 +238,8 @@ namespace Paymentech.Tests.Gateway
             result.MerchantID = long.Parse(profile.MerchantId);
             result.CustomerID = customerID;
             result.LastTransactionUtc = System.DateTime.UtcNow;
-            result.IsRecurring = profile.MerchantId == PaymentechGatewaySettings.RecurringMerchantId;
+            if(recurringOrderItemID.HasValue)
+                result.RecurringOrderItemID = recurringOrderItemID.Value;
             return result;
         }
         protected virtual PriorOrderRequest MapPriorOrderRequest(CustomerInfo customerInfo,OrderInfo orderInfo,PaymentechTransactionItem transaction,PaymentechProfileItem profile)
@@ -287,7 +316,12 @@ namespace Paymentech.Tests.Gateway
             result = orderItemInfos.Any(x => x.OrderItemSKU.SKUNeedsShipping);
             return result;
         }
- 
+
+        protected virtual List<OrderItemInfo> GetRecurringOrderItems(OrderInfo orderInfo)
+        {
+            var result = new List<OrderItemInfo>();
+            return result;
+        }
         #endregion
     }
 }
