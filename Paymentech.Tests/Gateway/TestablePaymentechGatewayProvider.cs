@@ -42,6 +42,20 @@ namespace Paymentech.Tests.Gateway
         {
             return this.CreateNewOrder(customerInfo, orderInfo, paymentProfile);
         }
-       
+
+        public OrderResponse VoidOrderTransactionAccessor(CustomerInfo customerInfo, OrderInfo orderInfo)
+        {
+            return this.VoidOrderTransaction(customerInfo, orderInfo);
+        }
+
+        public OrderResponse RefundOrderTransactionAccessor(CustomerInfo customerInfo, OrderInfo orderInfo,double amount)
+        {
+            return this.RefundOrderTransaction(customerInfo, orderInfo,amount);
+        }
+
+        public ProfileResponse FetchCustomerProfileAccessor(PaymentechProfileItem paymentechProfile)
+        {
+            return this.FetchCustomerProfile(paymentechProfile);
+        }
     }
 }

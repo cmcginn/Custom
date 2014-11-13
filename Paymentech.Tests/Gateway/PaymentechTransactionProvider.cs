@@ -28,7 +28,22 @@ namespace Paymentech.Tests.Gateway
             }
             return result;
         }
+        public List<PaymentechTransactionItem> GetOrderTransactionsForOrder(OrderInfo order)
+        {
+            List<PaymentechTransactionItem> result = null;
+            var customTable = DataClassInfoProvider.GetDataClassInfo(PaymentechTransactionItem.CLASS_NAME);
+            if (customTable != null)
+            {
 
+                var customTableItems =
+                    CustomTableItemProvider.GetItems<PaymentechTransactionItem>()
+                        .Where(x => x.OrderID == order.OrderID);
+                result = customTableItems.ToList();
+
+
+            }
+            return result;
+        }
         public void InsertCustomerTransaction(PaymentechTransactionItem item)
         {
             CustomTableItemProvider.SetItem(item);

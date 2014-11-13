@@ -28,6 +28,50 @@ namespace Paymentech.Tests.Gateway
             InsertPaymentechTransactionItem(customerInfo, orderInfo, result,paymentProfile);
             return result;
         }
+        protected virtual OrderResponse VoidOrderTransaction(CustomerInfo customerInfo, OrderInfo orderInfo)
+        {
+            var transactionProvider = new PaymentechTransactionProvider();               
+            //TODO: Error Handling        
+            
+            var transactions = transactionProvider.GetOrderTransactionsForOrder(orderInfo);
+            var transaction = transactions.Last(x => x.TransactionType == "A" || x.TransactionType == "AC");
+            var profileProvider = new PaymentechProfileProvider();
+            var profile = profileProvider.GetCustomerPaymentProfiles(customerInfo).Single(x=>x.ItemID == transaction.PaymentProfileID);
+            //TODO:Check Captured
+            var request = MapPriorOrderRequest(customerInfo, orderInfo,transaction,profile);
+            var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+            var recurring = transaction.MerchantID.ToString() == PaymentechGatewaySettings.RecurringMerchantId;
+            var result = facade.Void(request, recurring);
+            if(result.Success){
+                InsertPaymentechTransactionItem(customerInfo, orderInfo, result, profile);
+                //TODO:Set New Payment Status
+            }
+            
+            
+            return result;
+        }
+        protected virtual OrderResponse RefundOrderTransaction(CustomerInfo customerInfo, OrderInfo orderInfo, double amount)
+        {
+            var transactionProvider = new PaymentechTransactionProvider();
+            //TODO: Error Handling        
+
+            var transactions = transactionProvider.GetOrderTransactionsForOrder(orderInfo);
+            var transaction = transactions.Last(x => x.TransactionType == "C" || x.TransactionType == "AC" || x.TransactionType =="A");
+            var profileProvider = new PaymentechProfileProvider();
+            var profile = profileProvider.GetCustomerPaymentProfiles(customerInfo).Single(x => x.ItemID == transaction.PaymentProfileID);
+            var request = MapPriorOrderRequest(customerInfo, orderInfo, transaction, profile);
+            var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+            var recurring = transaction.MerchantID.ToString() == PaymentechGatewaySettings.RecurringMerchantId;
+            request.TransactionTotal = amount;
+            var result = facade.Refund(request, recurring);
+            if (result.Success)
+            {
+                InsertPaymentechTransactionItem(customerInfo, orderInfo, result, profile);
+                //TODO:Set New Payment Status
+            }
+            
+            return result;
+        }
         protected virtual void InsertPaymentechProfileItem(PaymentechProfileItem paymentechProfile)
         {
             var profileProvider = new PaymentechProfileProvider();
@@ -38,7 +82,7 @@ namespace Paymentech.Tests.Gateway
             
             var transaction = new PaymentechTransactionItem
             {
-                AuthorizationCode = orderResponse.TransactionRefNum,
+                AuthorizationCode = orderResponse.AuthorizationCode,
                 CustomerID = customerInfo.CustomerID,
                 HostResponseCode = orderResponse.HostResponseCode,
                 IsSuccess = orderResponse.Success,
@@ -101,6 +145,14 @@ namespace Paymentech.Tests.Gateway
             }
             return result;
         }
+
+        protected virtual ProfileResponse FetchCustomerProfile(PaymentechProfileItem paymentechProfile)
+        {
+            var facade = new PaymentechGatewayFacade(PaymentechGatewaySettings);
+            var recurring = paymentechProfile.MerchantID.ToString() == PaymentechGatewaySettings.RecurringMerchantId;
+            var result = facade.FetchProfile(paymentechProfile.CustomerRefNum.ToString(),recurring);
+            return result;
+        }
         protected virtual CustomerProfile MapCustomerProfile(CustomerInfo customerInfo, OrderInfo orderInfo)
         {
 
@@ -161,7 +213,17 @@ namespace Paymentech.Tests.Gateway
             result.IsRecurring = profile.MerchantId == PaymentechGatewaySettings.RecurringMerchantId;
             return result;
         }
-
+        protected virtual PriorOrderRequest MapPriorOrderRequest(CustomerInfo customerInfo,OrderInfo orderInfo,PaymentechTransactionItem transaction,PaymentechProfileItem profile)
+        {
+            var result = new PriorOrderRequest();
+            result.AuthorizationCode = transaction.AuthorizationCode;
+            result.CustomerRefNum = profile.CustomerRefNum.ToString();
+            result.GatewayOrderId = transaction.GatewayOrderID;
+            result.TransactionRefNum = transaction.TransactionReference;
+            
+            return result;
+            
+        }
         protected virtual OrderRequest MapNewOrderRequest(PaymentechProfileItem paymentProfile,OrderInfo orderInfo)
         {
             var result = new OrderRequest();

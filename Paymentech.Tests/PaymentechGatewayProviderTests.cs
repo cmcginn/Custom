@@ -30,7 +30,7 @@ namespace Paymentech.Tests
         public OrderInfo GetWellknownOrderInfo()
         {
 
-            return OrderInfoProvider.GetOrderInfo(256);
+            return OrderInfoProvider.GetOrderInfo(264);
             // var result = TestHelper.CreateOrder()
         }
         public OrderInfo CreateNewOrderInfo()
@@ -115,6 +115,14 @@ namespace Paymentech.Tests
         }
 
         [TestMethod]
+        public void FetchCustomerProfileTest()
+        {
+            var target = GetTarget();
+            var paymentechProfile = GetWellKnownPaymentechProfileItem();
+            var actual = target.FetchCustomerProfileAccessor(paymentechProfile);
+        }
+
+        [TestMethod]
         public void GetCustomerPaymentProfilesTest()
         {
             var customerInfo = GetWellknownCustomerInfo();
@@ -155,6 +163,45 @@ namespace Paymentech.Tests
             Assert.IsTrue(updatedTransactions.Count - 1 == transactionCount, "2");
             Assert.IsTrue(lastTransaction.TransactionType == "AC");
             Assert.IsTrue(lastTransaction.ProcStatusMessage == "Approved");
+        }
+
+        [TestMethod]
+        public void VoidOrderTest()
+        {
+            
+            var customer = GetWellknownCustomerInfo();
+            var order = CreateNewOrderInfo();
+            var profile = GetWellKnownPaymentechProfileItem();
+            var target = GetTarget();
+            var orderResponse = target.CreateNewOrderAccessor(customer, order, profile);
+            target.VoidOrderTransactionAccessor(customer, order);
+            var transactionProvider = new PaymentechTransactionProvider();
+            var transactions = transactionProvider.GetOrderTransactionsForOrder(order);
+            var orderTxn = transactions.FirstOrDefault(x=>x.TransactionType=="A" || x.TransactionType=="AC");
+            var voidTransaction = transactions.OrderBy(x => x.ItemCreatedWhen).Last();
+            Assert.IsTrue(voidTransaction.TransactionType == "VOID","1");
+            Assert.IsTrue(voidTransaction.TransactionReference == orderTxn.TransactionReference, "2");
+            Assert.IsTrue(voidTransaction.GatewayOrderID == orderTxn.GatewayOrderID, "3");
+
+        }
+
+        [TestMethod]
+        public void RefundOrderTest()
+        {
+
+            var customer = GetWellknownCustomerInfo();
+            var order = CreateNewOrderInfo();
+            var profile = GetWellKnownPaymentechProfileItem();
+            var target = GetTarget();
+            var orderResponse = target.CreateNewOrderAccessor(customer, order, profile);
+            target.RefundOrderTransactionAccessor(customer, order,1.00d);
+            var transactionProvider = new PaymentechTransactionProvider();
+            var transactions = transactionProvider.GetOrderTransactionsForOrder(order);
+            var orderTxn = transactions.FirstOrDefault(x => x.TransactionType == "A" || x.TransactionType == "AC");
+            var voidTransaction = transactions.OrderBy(x => x.ItemCreatedWhen).Last();
+            Assert.IsTrue(voidTransaction.TransactionType == "FR", "1");
+            Assert.IsTrue(voidTransaction.GatewayOrderID == orderTxn.GatewayOrderID, "2");
+
         }
     }
 }
