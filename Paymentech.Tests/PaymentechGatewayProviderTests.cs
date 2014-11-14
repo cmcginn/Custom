@@ -132,9 +132,21 @@ namespace Paymentech.Tests
             //var result = new RecurringCustomerProfile();
             var customerInfo = GetWellknownCustomerInfo();
             var orderInfo = CreateNewOrderInfo();
-            var orderItemInfo = new OrderItemInfo();          
-            var profile = target.MapProfileRecurringInfoAccessor(customerInfo, orderInfo, orderItemInfo);
-            var actual = target.CreateRecurringCustomerProfileAccessor(profile,orderItemInfo);
+            OrderItemInfo newItem = new OrderItemInfo
+            {
+                OrderItemSKUName = "Recurring Subscription",
+                OrderItemOrderID = orderInfo.OrderID,
+                OrderItemSKUID = 142,
+                OrderItemUnitPrice = 39.99,
+                OrderItemUnitCount = 1
+            };
+
+            // Create the order item
+            OrderItemInfoProvider.SetOrderItemInfo(newItem);
+            target.RecurringItems.Add(newItem);
+            target.Order = orderInfo;
+            var profile = target.MapProfileRecurringInfoAccessor(customerInfo, orderInfo, newItem);
+            var actual = target.CreateRecurringCustomerProfileAccessor(profile,newItem);
             Assert.IsTrue(actual.Success);
         }
         [TestMethod]
