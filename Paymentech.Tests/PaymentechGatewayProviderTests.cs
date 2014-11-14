@@ -147,7 +147,8 @@ namespace Paymentech.Tests
             target.Order = orderInfo;
             var profile = target.MapProfileRecurringInfoAccessor(customerInfo, orderInfo, newItem);
             var actual = target.CreateRecurringCustomerProfileAccessor(profile,newItem);
-            Assert.IsTrue(actual.Success);
+
+            Assert.IsTrue(actual.CardInfo.CardBrand == "Visa");
         }
         [TestMethod]
         public void CreateNewOrderTest()
