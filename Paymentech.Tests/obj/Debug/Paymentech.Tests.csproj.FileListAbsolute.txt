@@ -115,5 +115,5 @@ C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\CMS.FileSystemStorage.xml
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\CMSCustom.dll
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\CMSCustom.pdb
-C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\PaymentechGateway.Provider.dll
-C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\PaymentechGateway.Provider.pdb
+C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\Paymentech.dll
+C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech.Tests\bin\Debug\Paymentech.pdb

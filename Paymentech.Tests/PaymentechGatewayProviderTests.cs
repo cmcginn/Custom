@@ -7,9 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CMS.Globalization;
 using CMS.DataProviderSQL;
 using CMS.Ecommerce;
-using Paymentech.Tests.Gateway;
+using Paymentech.Data;
 using Paymentech.Tests.Helpers;
-using PaymentechGateway.Provider;
+using Paymentech.Tests.Provider;
+
 
 
 namespace Paymentech.Tests

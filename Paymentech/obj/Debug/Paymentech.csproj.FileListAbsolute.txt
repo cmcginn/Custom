@@ -1,4 +1,3 @@
-C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\obj\Debug\Paymentech.csprojResolveAssemblyReference.cache
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\Paymentech.dll.config
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\Paymentech.dll
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\Paymentech.pdb
@@ -113,3 +112,4 @@ C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\CMS.WebServices.xml
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\CMS.LicenseProvider.XmlSerializers.dll
 C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\bin\Debug\CMS.Controls.XmlSerializers.dll
+C:\Projects\bluemodus-revolutiongolf-2014-094d1ee59ed6\bluemodus-revolutiongolf-2014-094d1ee59ed6\Custom\Paymentech\obj\Debug\Paymentech.csprojResolveAssemblyReference.cache

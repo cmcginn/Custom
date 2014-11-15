@@ -706,7 +706,8 @@ namespace Paymentech.Core
             result.MerchantId = response.merchantID;
             result.CardInfo = new CardInfo();
             result.CardInfo.CardNumber = response.ccAccountNum;
-            result.CardInfo.MaskedCardNumber = response.ccAccountNum.Substring(response.ccAccountNum.Length - 4);
+            if(!String.IsNullOrEmpty(response.ccAccountNum))
+                result.CardInfo.MaskedCardNumber = response.ccAccountNum.Substring(response.ccAccountNum.Length - 4);
             result.CardInfo.CardholderName = response.customerName;
             result.CardInfo.ExpirationDate = response.ccExp;
             result.CardInfo.CardBrand = GetCardBrand(response.ccAccountNum);

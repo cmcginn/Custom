@@ -1,13 +1,14 @@
 ﻿using CMS.CustomTables.Types;
 using CMS.Ecommerce;
-using PaymentechGateway.Provider;
+using Paymentech.Provider;
+using Paymentech.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Paymentech.Tests.Gateway
+namespace Paymentech.Tests.Provider
 {
     public class TestablePaymentechGatewayProvider:PaymentechGatewayProvider
     {

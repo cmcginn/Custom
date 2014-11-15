@@ -80,10 +80,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\CMS.SiteProvider.dll</HintPath>
     </Reference>
-    <Reference Include="PaymentechGateway.Provider">
-      <HintPath>..\..\..\..\cmcginn\PaymentechGateway\PaymentechGateway.Provider\bin\Debug\PaymentechGateway.Provider.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.EnterpriseServices" />
@@ -91,6 +89,7 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -105,14 +104,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Gateway\PaymentechGatewayProvider.cs" />
-    <Compile Include="Gateway\PaymentechGatewayProvider_Old.cs" />
-    <Compile Include="Gateway\PaymentechProfileItem.Generated.cs" />
-    <Compile Include="Gateway\PaymentechProfileProvider.cs" />
-    <Compile Include="Gateway\PaymentechProfileProvider_Old.cs" />
-    <Compile Include="Gateway\PaymentechTransactionItem.Generated.cs" />
-    <Compile Include="Gateway\PaymentechTransactionProvider.cs" />
-    <Compile Include="Gateway\TestablePaymentechGatewayProvider.cs" />
+    <Compile Include="Facade\PaymentechGatewayFacadeTests.cs" />
     <Compile Include="Helpers\TestHelper.cs" />
     <Compile Include="Mocks\PaymentechSettingsMock.cs" />
     <Compile Include="PaymentechGatewayProviderTests.cs" />
@@ -122,11 +114,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Service References\PaymentechGateway\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
+    <Compile Include="Provider\TestablePaymentechGatewayProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -134,94 +122,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.AccountUpdaterResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.AccountUpdaterResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.EndOfDayResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.EndOfDayResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.FlexCacheResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.FlexCacheResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.InquiryResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.InquiryResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.LogMessageResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.LogMessageResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MarkForCapture2Response.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MarkForCaptureResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MarkForCaptureResponse2Element.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MarkForCaptureResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MFCResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.MFCResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.NewOrderResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.NewOrderResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ProfileAddResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ProfileChangeResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ProfileDeleteResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ProfileFetchResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ProfileResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ReversalResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.ReversalResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.SafetechFraudAnalysisResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.SafetechFraudAnalysisResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.UnmarkResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\Paymentech.Tests.PaymentechGateway.UnmarkResponseElement.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\PaymentechGateway\PaymentechGateway.wsdl" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -230,26 +130,16 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadataStorage Include="Service References\PaymentechGateway\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\PaymentechGateway\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\PaymentechGateway\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\PaymentechGateway\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\CMS\CMSCustom.csproj">
       <Project>{e38494bf-4436-46e3-862c-f7707bf847c5}</Project>
       <Name>CMSCustom</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Paymentech\Paymentech.csproj">
+      <Project>{8fc81ab1-9efe-471a-8d24-a92b56026450}</Project>
+      <Name>Paymentech</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
