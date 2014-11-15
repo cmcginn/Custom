@@ -107,13 +107,14 @@
     <Compile Include="Facade\PaymentechGatewayFacadeTests.cs" />
     <Compile Include="Helpers\TestHelper.cs" />
     <Compile Include="Mocks\PaymentechSettingsMock.cs" />
-    <Compile Include="PaymentechGatewayProviderTests.cs" />
+    <Compile Include="Provider\PaymentechGatewayProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Provider\DisconnectedProvider.cs" />
     <Compile Include="Provider\TestablePaymentechGatewayProvider.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -552,7 +552,7 @@ namespace Paymentech.Core
             result.orbitalConnectionPassword = _settings.Password;
             result.terminalID = _settings.TerminalId;
             result.merchantID = recurring ? _settings.RecurringMerchantId : _settings.MerchantId;
-
+            result.comments = request.Comments;
             result.customerRefNum = request.CustomerRefNum;
             result.industryType = "EC";
 

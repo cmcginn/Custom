@@ -12,6 +12,6 @@ namespace Paymentech.Core
         public virtual double OrderShipping { get; set; }
         public virtual double OrderTax { get; set; }
         public virtual bool ShippingRequired { get; set; }
-
+        public string Comments { get; set; }
     }
 }

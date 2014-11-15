@@ -42,6 +42,40 @@ namespace CMS.CustomTables.Types
         /// 
         /// </summary>
         [DatabaseField]
+        public string TransactionRequest
+        {
+            get
+            {
+                return ValidationHelper.GetString(GetValue("TransactionRequest"), "");
+            }
+            set
+            {
+                SetValue("TransactionRequest", value);
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DatabaseField]
+        public string TransactionResponse
+        {
+            get
+            {
+                return ValidationHelper.GetString(GetValue("TransactionResponse"), "");
+            }
+            set
+            {
+                SetValue("TransactionResponse", value);
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DatabaseField]
         public string GatewayOrderID
         {
             get

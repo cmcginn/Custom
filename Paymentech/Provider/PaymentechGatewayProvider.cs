@@ -20,13 +20,51 @@ namespace Paymentech.Provider
         {
             var orderInfo = GetOrderInfo();
             var customerInfo = CustomerInfoProvider.GetCustomerInfo(orderInfo.OrderCustomerID);
+            var orderStatuses = OrderStatusInfoProvider.GetOrderStatuses();
+            var orderStatus = orderStatuses.Single(x => x.StatusName == "PaymentFailed");
             ProcessRecurringItems(customerInfo, orderInfo);
-            
+            var completed = orderStatuses.Single(x => x.StatusName == "Completed");  
+            if(GetNonRecurringOrderItems(orderInfo).Any())
+            {
+                var standardOrder = ProcessNonRecurringItems(customerInfo, orderInfo);                
+                if (standardOrder.TransactionType == "A")
+                    orderStatus = orderStatuses.Single(x => x.StatusName == "PendingCapture");                    
+                else             
+                    orderStatus = completed;
+            }
+            else
+            {
+                orderStatus = completed;
+            }
 
-            //base.ProcessPayment();
+            orderInfo.OrderStatusID = orderStatus.StatusID;
+            orderInfo.OrderIsPaid = orderStatus == completed;
         }
         #region Class Methods
 
+        protected virtual OrderResponse ProcessNonRecurringItems(CustomerInfo customerInfo, OrderInfo orderInfo)
+        {
+            //if customer profile selected 
+            var profileId = GetSelectedProfileId();
+            var paymentProfileProvider = new PaymentechProfileProvider();
+            long customerRefNumber = 0;
+            PaymentechProfileItem profileItem = null;
+            if(profileId==0)
+            {
+                //create new profile
+                var newProfile = MapCustomerProfile(customerInfo, orderInfo);
+                var profile = CreateCustomerProfile(newProfile);
+                customerRefNumber = long.Parse(profile.CustomerRefNum);
+                profileItem = paymentProfileProvider.GetCustomerPaymentProfiles(customerInfo).Single(x => x.CustomerRefNum == customerRefNumber);
+                //TODO:Exception
+            }
+            else
+            {
+                profileItem = paymentProfileProvider.GetCustomerPaymentProfiles(customerInfo).Single(x => x.ItemID == profileId);
+            }
+            var orderResponse = CreateNewOrder(customerInfo, orderInfo, profileItem);
+            return orderResponse;
+        }
         protected void ProcessRecurringItems(CustomerInfo customerInfo,OrderInfo orderInfo)
         {
             var recurringItems = GetRecurringOrderItems(orderInfo);
@@ -111,8 +149,9 @@ namespace Paymentech.Provider
                 GatewayOrderID = orderResponse.GatewayOrderId,
                 TransactionReference = orderResponse.TransactionRefNum,
                 ProcStatusMessage = orderResponse.ProcStatusMessage,
-                TransactionType = orderResponse.TransactionType
-
+                TransactionType = orderResponse.TransactionType,
+                TransactionRequest=orderResponse.TransactionRequest.ToString(),
+                TransactionResponse=orderResponse.TransactionResponse.ToString()
             };
             var provider = new PaymentechTransactionProvider();
             provider.InsertCustomerTransaction(transaction);
@@ -151,7 +190,7 @@ namespace Paymentech.Provider
                 recurringProfile.CustomerRefNum = response.CustomerRefNum;
                 recurringProfile.EmailAddress = response.EmailAddress;
             }
-            var profile = MapPaymentechProfileItem(recurringProfile,GetOrderInfo().OrderCustomerID,recurringOrderItem.OrderItemID);
+            var profile = MapPaymentechProfileItem(recurringProfile,GetOrderInfo().OrderCustomerID,recurringOrderItem.OrderItemID);            
             InsertPaymentechProfileItem(profile);
             return response;
         }
@@ -223,7 +262,7 @@ namespace Paymentech.Provider
 
             //TODO: Figure this out
             result.RecurringFrequency = RecurringFrequency.Monthly;
-            result.RecurringAmount = recurringOrderItemInfo.OrderItemUnitPrice;
+            result.RecurringAmount =  recurringOrderItemInfo.OrderItemUnitPrice;
             result.StartDate = System.DateTime.UtcNow.AddDays(1);
             return result;
         }
@@ -261,8 +300,11 @@ namespace Paymentech.Provider
             result.GatewayOrderId = CreateGatewayOrderId(orderInfo);
             result.OrderShipping = orderInfo.OrderTotalShipping;
             result.OrderTax = orderInfo.OrderTotalTax;
-            result.TransactionTotal = orderInfo.OrderTotalPrice;
+            result.TransactionTotal = GetNonRecurringOrderTotal(orderInfo);
+            var orderItems = GetNonRecurringOrderItems(orderInfo);
+            result.Comments = GetNewOrderComments(orderItems);      
             result.ShippingRequired = GetShippingRequired(orderInfo);
+            
             return result;
         }
         #endregion
@@ -314,14 +356,38 @@ namespace Paymentech.Provider
         {
             var result = false;
             var orderItemInfos = OrderItemInfoProvider.GetOrderItems(orderInfo.OrderID);
-            result = orderItemInfos.Any(x => x.OrderItemSKU.SKUNeedsShipping);
+            result = orderItemInfos.Any(x =>x.OrderItemSKU.SKUNeedsShipping);
             return result;
         }
+        public string GetNewOrderComments(List<OrderItemInfo> orderItems)
+        {
+            var itemList = orderItems.Select(x => String.Format("{0} - {1}", x.OrderItemSKUID, x.OrderItemSKU)).ToList();
+            var result = String.Join("|", itemList);
+            return result;
+        }
+        protected virtual List<OrderItemInfo> GetNonRecurringOrderItems(OrderInfo orderInfo)
+        {
+            var nonRecurring = OrderItemInfoProvider.GetOrderItems(orderInfo.OrderID);
+            var recurring = GetRecurringOrderItems(orderInfo);
+            var result = nonRecurring.Except(recurring).ToList();
+            return result;
 
+        }
         protected virtual List<OrderItemInfo> GetRecurringOrderItems(OrderInfo orderInfo)
         {
-            var result = new List<OrderItemInfo>();
+            var recurring = OrderItemInfoProvider.GetOrderItems(orderInfo.OrderID);
+            var nonRecurring = GetNonRecurringOrderItems(orderInfo);
+            var result = recurring.Except(nonRecurring).ToList();
             return result;
+        }
+        protected double GetNonRecurringOrderTotal(OrderInfo orderInfo)
+        {
+            var recurringTotal = GetRecurringOrderItems(orderInfo).Sum(x => x.OrderItemUnitPrice * x.OrderItemUnitCount);
+            return orderInfo.OrderTotalPrice - recurringTotal;
+        }
+        protected virtual int GetSelectedProfileId()
+        {
+            throw new System.NotImplementedException();
         }
         #endregion
     }

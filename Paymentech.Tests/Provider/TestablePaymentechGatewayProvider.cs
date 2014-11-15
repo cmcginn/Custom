@@ -14,6 +14,19 @@ namespace Paymentech.Tests.Provider
     {
         public OrderInfo Order { get; set; }
         List<OrderItemInfo> _recurringItems;
+        List<OrderItemInfo> _orderItems;
+        public List<OrderItemInfo> OrderItems
+        {
+            get
+            {
+                return _orderItems ?? (_orderItems = new List<OrderItemInfo>());
+            }
+        }
+        public int SelectedProfileId = 0;
+        protected override int GetSelectedProfileId()
+        {
+            return SelectedProfileId;
+        }
         public List<OrderItemInfo> RecurringItems
         {
             get
@@ -69,6 +82,10 @@ namespace Paymentech.Tests.Provider
         protected override List<OrderItemInfo> GetRecurringOrderItems(OrderInfo orderInfo)
         {
             return RecurringItems;
+        }
+        protected override List<OrderItemInfo> GetNonRecurringOrderItems(OrderInfo orderInfo)
+        {
+            return OrderItems;
         }
     }
 }
