@@ -22,8 +22,7 @@ namespace Paymentech.Tests.Provider
         [ClassInitialize]
         public static void Init(TestContext ctx)
         {
-            CustomTableItemGenerator.RegisterCustomTable<PaymentechProfileItem>(PaymentechProfileItem.CLASS_NAME);
-            CustomTableItemGenerator.RegisterCustomTable<PaymentechTransactionItem>(PaymentechTransactionItem.CLASS_NAME);
+            TestInitializer.Initialize();
         }
         public TestablePaymentechGatewayProvider GetTarget()
         {

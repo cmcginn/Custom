@@ -118,6 +118,7 @@
     <Compile Include="Provider\DisconnectedProvider.cs" />
     <Compile Include="Provider\TestablePaymentechGatewayProvider.cs" />
     <Compile Include="IPaymentechGatewayTests.cs" />
+    <Compile Include="TestInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
