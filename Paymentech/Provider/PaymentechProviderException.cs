@@ -12,5 +12,6 @@ namespace Paymentech.Provider
         {
             
         }
+        public PaymentechProviderException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

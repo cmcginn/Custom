@@ -11,6 +11,7 @@ using Paymentech.Data;
 using Paymentech.Tests.Helpers;
 using Paymentech.Tests.Provider;
 using System.Collections.Generic;
+using Paymentech.Provider;
 
 
 
@@ -280,6 +281,72 @@ namespace Paymentech.Tests.Provider
         #endregion
 
         #region Exception Tests
+
+        [TestMethod]
+        [ExpectedException(typeof(PaymentechProviderException))]
+        public void ProcessPaymentTest_WhenSingleItem_ExistingProfile_NoShippingRequired_OrderAmount_Zero()
+        {
+            var target = GetTarget();
+            var setup = new PaymentTestSetup();
+            CreateStandardTestSetup(setup);
+            
+            target.OrderItems.Add(setup.OrderItems.First());
+            target.Order = setup.OrderInfo;
+            target.Order.OrderTotalPrice = 0;
+            target.SelectedProfileId = setup.ExistingProfiles.Where(x => x.MerchantID == 239877).Last().ItemID;
+            target.ProcessPayment();
+
+        }
+        [TestMethod]
+        [ExpectedException(typeof(PaymentechProviderException))]
+        public void ProcessPaymentTest_WhenSingleItem_ExistingProfileDoesNotExist_NoShippingRequired()
+        {
+            var target = GetTarget();
+            var setup = new PaymentTestSetup();
+            CreateStandardTestSetup(setup);
+            target.OrderItems.Add(setup.OrderItems.First());
+            target.Order = setup.OrderInfo;
+            target.SelectedProfileId = -1;//setup.ExistingProfiles.Where(x => x.MerchantID == 239877).Last().ItemID;
+            target.ProcessPayment();
+
+            
+            
+        }
+
+        [TestMethod]
+        public void ProcessPaymentTest_WhenRecurringSucceeds_NonRecurringFailes_CheckProfiles_Canceled()
+        {
+            var target = GetTarget();
+            var setup = new PaymentTestSetup();
+            CreateStandardTestSetup(setup);
+            target.OrderItems.Add(setup.OrderItems.First());
+            var paymentProfileProvider = new PaymentechProfileProvider();
+            var existingProfiles = paymentProfileProvider.GetCustomerPaymentProfiles(setup.CustomerInfo);
+            var lastProfileId = existingProfiles.OrderBy(x => x.ItemCreatedWhen).Last().ItemID;
+            var first = setup.OrderItems.First();
+            first.OrderItemUnitPrice = 0;
+
+            var newItem = GetNoShippingRequiredOrderItem();
+            newItem.OrderItemOrderID = setup.OrderInfo.OrderID;
+            target.RecurringItems.Add(newItem);
+            
+            target.Order = setup.OrderInfo;
+            //make the non recurring fail
+            target.Order.OrderTotalPrice = 0;
+            // Create the order item
+            OrderItemInfoProvider.SetOrderItemInfo(newItem);
+            try
+            {
+                target.ProcessPayment();
+            }catch(System.Exception ex)
+            {
+                //swallow, we know
+            }
+
+            var activeProfiles = paymentProfileProvider.GetCustomerPaymentProfiles(setup.CustomerInfo).Where(x => x.ItemID > lastProfileId && x.RecurringOrderItemID>0);
+            Assert.IsTrue(activeProfiles.Any(), "Profiles Expected");
+            Assert.IsFalse(activeProfiles.Any(x => x.IsActive), "Expected profiles to be inactive");
+        }
         #endregion
 
 

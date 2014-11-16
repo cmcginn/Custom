@@ -267,6 +267,11 @@ namespace Paymentech.Core
                 var response = client.ProfileAdd(request);
                 result = MapProfileResponseElement(response);
             }
+            catch (FaultException fe)
+            {
+                result = new ProfileResponse();
+                result.ErrorMessage = fe.Message;
+            }
             catch (System.Exception ex)
             {
                 result = new ProfileResponse();
@@ -312,6 +317,10 @@ namespace Paymentech.Core
                 }
                 
             }
+            catch (FaultException fe)
+            {
+                result.ErrorMessage = fe.Message;
+            }
             catch (System.Exception ex)
             {
                 result.ErrorMessage = ex.GetBaseException().Message;
@@ -327,6 +336,10 @@ namespace Paymentech.Core
                 var client = GetClient();
                 var response = client.ProfileAdd(request);
                 result = MapProfileResponseElement(response);
+            }
+            catch (FaultException fe)
+            {
+                result.ErrorMessage = fe.Message;
             }
             catch (System.Exception ex)
             {
@@ -362,6 +375,10 @@ namespace Paymentech.Core
                     result.ErrorMessage = response.procStatusMessage;
                 }
             }
+            catch (FaultException fe)
+            {
+                result.ErrorMessage = fe.Message;
+            }
             catch (System.Exception ex)
             {
                 result.ErrorMessage = ex.GetBaseException().Message;
@@ -395,6 +412,10 @@ namespace Paymentech.Core
                     result.ErrorMessage = response.procStatusMessage;
                 }
             }
+            catch (FaultException fe)
+            {
+                result.ErrorMessage = fe.Message;
+            }
             catch (System.Exception ex)
             {
                 result.ErrorMessage = ex.GetBaseException().Message;
@@ -427,6 +448,10 @@ namespace Paymentech.Core
                 {
                     result.ErrorMessage = response.procStatusMessage;
                 }
+            }
+            catch (FaultException fe)
+            {
+                result.ErrorMessage = fe.Message;
             }
             catch (System.Exception ex)
             {
