@@ -16,6 +16,6 @@ namespace Paymentech.Core
         OrderResponse Void(PriorOrderRequest voidPaymentRequest, bool recurring = false);
         ProfileResponse FetchProfile(string customerRefNum, bool recurring = false);
         ProfileResponse CancelProfile(string customerRefNum, bool recurring = false);
-        ProfileResponse UpdateProfile(CustomerProfile customerProfile, bool recurring = false);
+        ProfileResponse UpdateProfile(CustomerProfile customerProfile, bool recurring = false);       
     }
 }

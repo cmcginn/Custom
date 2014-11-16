@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Paymentech.PaymentechServiceReference;
+using System.Net.NetworkInformation;
 
 
 namespace Paymentech.Core
@@ -31,6 +32,7 @@ namespace Paymentech.Core
         }
         #endregion
         #region Utilities
+        
         /// <summary>
         /// Paymentech amount formats are strings with no decimal (i.e $10.00 = 1000)
         /// </summary>
@@ -295,6 +297,7 @@ namespace Paymentech.Core
                     result.HostResponseCode = response.hostRespCode;
                     result.AuthorizationCode = response.authorizationCode;
                     result.TransactionRefNum = response.txRefNum;
+                    result.TransactionAmount = double.Parse(request.amount) * .01;
                     if (response.transType == "AC")
                         result.PaymentStatus = PaymentStatus.AuthorizedForCapture;
                     else if (response.transType == "A")
@@ -352,7 +355,7 @@ namespace Paymentech.Core
                     result.TransactionResponse = SerializeMarkForCaptureResponse(response);
                     result.MerchantId = request.merchantID;
                     result.PaymentStatus = PaymentStatus.Captured;
-
+                    result.TransactionAmount = double.Parse(response.amount) * .01;
                 }
                 else
                 {
@@ -385,6 +388,7 @@ namespace Paymentech.Core
                     result.MerchantId = request.merchantID;
                     result.PaymentStatus = PaymentStatus.Captured;
                     result.GatewayOrderId = request.orderID;
+                    result.TransactionAmount = double.Parse(request.amount) * .01;
                 }
                 else
                 {
@@ -416,6 +420,7 @@ namespace Paymentech.Core
                     result.MerchantId = response.merchantID;
                     result.PaymentStatus = PaymentStatus.Voided;
                     result.TransactionRefNum = response.txRefNum;
+                    result.TransactionAmount = voidPaymentRequest.TransactionTotal;
                     result.TransactionResponse = SerializeReversalResponse(response);
                 }
                 else

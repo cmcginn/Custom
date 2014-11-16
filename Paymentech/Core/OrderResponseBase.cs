@@ -19,7 +19,7 @@ namespace Paymentech.Core
         public string TransactionRefNum { get; set; }
         public string ProcStatusMessage { get; set; }
         public string HostResponseCode { get; set; }
-
+        public double TransactionAmount { get; set; }
         public string TransactionType { get; set; }
         
     }

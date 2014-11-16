@@ -87,12 +87,14 @@
     <Compile Include="Core\PriorOrderRequest.cs" />
     <Compile Include="Core\ProfileResponse.cs" />
     <Compile Include="Core\RecurringCustomerProfile.cs" />
+    <Compile Include="Provider\IPaymentechGateway.cs" />
     <Compile Include="Provider\PaymentechGatewayProvider.cs" />
     <Compile Include="Data\PaymentechProfileItem.Generated.cs" />
     <Compile Include="Data\PaymentechProfileProvider.cs" />
     <Compile Include="Data\PaymentechTransactionItem.Generated.cs" />
     <Compile Include="Data\PaymentechTransactionProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\PaymentechProviderException.cs" />
     <Compile Include="Service References\PaymentechServiceReference\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

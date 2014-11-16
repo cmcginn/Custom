@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Paymentech.Tests.Provider
 {
-    public class TestablePaymentechGatewayProvider:PaymentechGatewayProvider
+    public class TestablePaymentechGatewayProvider : PaymentechGatewayProvider, IPaymentechGateway
     {
         public OrderInfo Order { get; set; }
         List<OrderItemInfo> _recurringItems;
@@ -65,15 +65,9 @@ namespace Paymentech.Tests.Provider
             return this.CreateNewOrder(customerInfo, orderInfo, paymentProfile);
         }
 
-        public OrderResponse VoidOrderTransactionAccessor(CustomerInfo customerInfo, OrderInfo orderInfo)
-        {
-            return this.VoidOrderTransaction(customerInfo, orderInfo);
-        }
 
-        public OrderResponse RefundOrderTransactionAccessor(CustomerInfo customerInfo, OrderInfo orderInfo,double amount)
-        {
-            return this.RefundOrderTransaction(customerInfo, orderInfo,amount);
-        }
+
+
 
         public ProfileResponse FetchCustomerProfileAccessor(PaymentechProfileItem paymentechProfile)
         {

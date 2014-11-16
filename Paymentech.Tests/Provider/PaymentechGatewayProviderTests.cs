@@ -17,7 +17,7 @@ using System.Collections.Generic;
 namespace Paymentech.Tests.Provider
 {
     [TestClass]
-    public class PaymentechGatewayProviderTests
+    public class PaymentechGatewayProviderTests : PaymentechTestBase
     {
         [ClassInitialize]
         public static void Init(TestContext ctx)
@@ -25,64 +25,11 @@ namespace Paymentech.Tests.Provider
             CustomTableItemGenerator.RegisterCustomTable<PaymentechProfileItem>(PaymentechProfileItem.CLASS_NAME);
             CustomTableItemGenerator.RegisterCustomTable<PaymentechTransactionItem>(PaymentechTransactionItem.CLASS_NAME);
         }
-        public static TestablePaymentechGatewayProvider GetTarget()
+        public TestablePaymentechGatewayProvider GetTarget()
         {
             return new TestablePaymentechGatewayProvider();
         }
-        public int GetWellKnownStandardProfileId()
-        {
-            return 22;
-        }
-        public OrderItemInfo GetOrderItemInfoBySkuID(int skuId)
-        {
-            var skuInfo = SKUInfoProvider.GetSKUInfo(skuId);
-            OrderItemInfo newItem = new OrderItemInfo
-            {
-                OrderItemSKUName = skuInfo.SKUName,              
-                OrderItemSKUID = skuInfo.SKUID,
-                OrderItemUnitPrice = skuInfo.SKUPrice,
-                OrderItemUnitCount = 1,
-
-
-            };
-            newItem.OrderItemSKU = skuInfo;
-            return newItem;
-        }
-        public OrderItemInfo GetShippingRequiredOrderItem()
-        {
-            return GetOrderItemInfoBySkuID(142);
-        }
-        public OrderItemInfo GetNoShippingRequiredOrderItem()
-        {
-            return GetOrderItemInfoBySkuID(182);
-        }
-        public OrderInfo GetWellknownOrderInfo()
-        {
-
-            return OrderInfoProvider.GetOrderInfo(264);
-            // var result = TestHelper.CreateOrder()
-        }
-        public OrderInfo CreateNewOrderInfo()
-        {
-            var custInfo = GetWellknownCustomerInfo();
-            var orderInfo = GetWellknownOrderInfo();
-            OrderAddressInfoProvider.GetAddressInfo(484);
-            //var address = AddressInfoProvider.GetAddressInfo(orderInfo.OrderBillingAddress.AddressGUID);
-            var result = TestHelper.CreateOrder(custInfo.CustomerID, 484, 10.00d, 0, 0);
-            return result;
-        }
-        public CustomerInfo GetWellknownCustomerInfo()
-        {
-            return CustomerInfoProvider.GetCustomerInfo(78);
-        }
-        PaymentechProfileItem GetWellKnownPaymentechProfileItem()
-        {
-            var provider = new PaymentechProfileProvider();
-            var profiles = provider.GetCustomerPaymentProfiles(GetWellknownCustomerInfo());
-            var result = profiles.Single(x => x.ItemID == 12);
-            return result;
-        }
-
+        #region Sync Tests
         [TestMethod]
         public void NewOrderSetup()
         {
@@ -205,45 +152,8 @@ namespace Paymentech.Tests.Provider
             Assert.IsTrue(lastTransaction.ProcStatusMessage == "Approved");
         }
 
-        [TestMethod]
-        public void VoidOrderTest()
-        {
-            
-            var customer = GetWellknownCustomerInfo();
-            var order = CreateNewOrderInfo();
-            var profile = GetWellKnownPaymentechProfileItem();
-            var target = GetTarget();
-            var orderResponse = target.CreateNewOrderAccessor(customer, order, profile);
-            target.VoidOrderTransactionAccessor(customer, order);
-            var transactionProvider = new PaymentechTransactionProvider();
-            var transactions = transactionProvider.GetOrderTransactionsForOrder(order);
-            var orderTxn = transactions.FirstOrDefault(x=>x.TransactionType=="A" || x.TransactionType=="AC");
-            var voidTransaction = transactions.OrderBy(x => x.ItemCreatedWhen).Last();
-            Assert.IsTrue(voidTransaction.TransactionType == "VOID","1");
-            Assert.IsTrue(voidTransaction.TransactionReference == orderTxn.TransactionReference, "2");
-            Assert.IsTrue(voidTransaction.GatewayOrderID == orderTxn.GatewayOrderID, "3");
-
-        }
-
-        [TestMethod]
-        public void RefundOrderTest()
-        {
-
-            var customer = GetWellknownCustomerInfo();
-            var order = CreateNewOrderInfo();
-            var profile = GetWellKnownPaymentechProfileItem();
-            var target = GetTarget();
-            var orderResponse = target.CreateNewOrderAccessor(customer, order, profile);
-            target.RefundOrderTransactionAccessor(customer, order,1.00d);
-            var transactionProvider = new PaymentechTransactionProvider();
-            var transactions = transactionProvider.GetOrderTransactionsForOrder(order);
-            var orderTxn = transactions.FirstOrDefault(x => x.TransactionType == "A" || x.TransactionType == "AC");
-            var voidTransaction = transactions.OrderBy(x => x.ItemCreatedWhen).Last();
-            Assert.IsTrue(voidTransaction.TransactionType == "FR", "1");
-            Assert.IsTrue(voidTransaction.GatewayOrderID == orderTxn.GatewayOrderID, "2");
-
-        }
-
+     
+        #endregion
         #region Process Payment Tests
         [TestMethod]
         public void ProcessPaymentTest_WhenSingle_RecurringItem()
@@ -297,9 +207,11 @@ namespace Paymentech.Tests.Provider
             setup.PostProcess();
             var orderStatus = OrderStatusInfoProvider.GetOrderStatusInfo("PendingCapture", "ECommerceSite");
             ValidateNonRecurringOrder(setup.OrderInfo.OrderID);
+            var txn = setup.TransactionItems.OrderBy(x=>x.ItemCreatedWhen).Last();
             Assert.IsNull(setup.NewProfile,"No new profile expected");
             Assert.IsTrue(setup.OrderInfo.OrderStatusID == orderStatus.StatusID, "Expected Pending Capture Order Status");
             Assert.IsFalse(setup.OrderInfo.OrderIsPaid, "Expected OrderIsPaid to be false");
+            Assert.AreEqual(txn.TransactionAmount, setup.OrderInfo.OrderTotalPrice, "Expected Equal order and Transaction Amounts");
 
         }
         [TestMethod]
@@ -314,10 +226,12 @@ namespace Paymentech.Tests.Provider
             target.ProcessPayment();
             setup.PostProcess();
             var orderStatus = OrderStatusInfoProvider.GetOrderStatusInfo("Completed", "ECommerceSite");
+            var txn = setup.TransactionItems.OrderBy(x => x.ItemCreatedWhen).Last();
             ValidateNonRecurringOrder(setup.OrderInfo.OrderID);
             Assert.IsNull(setup.NewProfile, "No new profile expected");
             Assert.IsTrue(setup.OrderInfo.OrderStatusID == orderStatus.StatusID, "Expected Completed Order Status");
             Assert.IsTrue(setup.OrderInfo.OrderIsPaid, "Expected OrderIsPaid to be true");
+            Assert.AreEqual(txn.TransactionAmount, setup.OrderInfo.OrderTotalPrice, "Expected Equal order and Transaction Amounts");
         }
         [TestMethod]
         public void ProcessPaymentTest_Shipping_And_NonShipping_Items_Existing_Profile()
@@ -332,10 +246,11 @@ namespace Paymentech.Tests.Provider
             setup.PostProcess();
             var orderStatus = OrderStatusInfoProvider.GetOrderStatusInfo("PendingCapture", "ECommerceSite");
             ValidateNonRecurringOrder(setup.OrderInfo.OrderID);
+            var txn = setup.TransactionItems.OrderBy(x => x.ItemCreatedWhen).Last();
             Assert.IsNull(setup.NewProfile, "No new profile expected");
             Assert.IsTrue(setup.OrderInfo.OrderStatusID == orderStatus.StatusID, "Expected Pending Capture Order Status");
             Assert.IsFalse(setup.OrderInfo.OrderIsPaid, "Expected OrderIsPaid to be false");
-
+            Assert.AreEqual(txn.TransactionAmount, setup.OrderInfo.OrderTotalPrice, "Expected Equal order and Transaction Amounts");
         }
 
         [TestMethod]
@@ -352,120 +267,24 @@ namespace Paymentech.Tests.Provider
             setup.PostProcess();
             var orderStatus = OrderStatusInfoProvider.GetOrderStatusInfo("PendingCapture", "ECommerceSite");
             ValidateNonRecurringOrder(setup.OrderInfo.OrderID);
+            var txn = setup.TransactionItems.OrderBy(x => x.ItemCreatedWhen).Last();
             Assert.IsNotNull(setup.NewProfile, "New profile expected");
             Assert.IsTrue(setup.NewProfile.MerchantID == 239880, "Expected new Recurring Profile");
             Assert.IsTrue(setup.OrderInfo.OrderStatusID == orderStatus.StatusID, "Expected Pending Capture Order Status");
             Assert.IsFalse(setup.OrderInfo.OrderIsPaid, "Expected OrderIsPaid to be false");
-
+            Assert.AreNotEqual(txn.TransactionAmount, setup.OrderInfo.OrderTotalPrice, "Expected Not Equal order and Transaction Amounts Due to Recurring Amount in seperate transaction");
         }
         #endregion
 
-      
-
-
-        #region utility
-        public void ValidateNonRecurringOrder(int orderId)
-        {
-            var lastOrder = OrderInfoProvider.GetOrderInfo(orderId);
-            var tp = new PaymentechTransactionProvider();
-            var transactions = tp.GetOrderTransactionsForOrder(lastOrder);
-            var gatewayId = lastOrder.OrderGUID.ToString().Replace("-","").Substring(0,22);
-            Assert.IsTrue(transactions.Any(),"No transactions found for Order");
-            
-            transactions.ForEach(x=>{
-                Assert.IsTrue(x.PaymentProfileID > 0, "Expected Payment Profile ID");
-                Assert.IsFalse(String.IsNullOrEmpty(x.TransactionRequest),"Transaction Request should not be empty");
-                Assert.IsFalse(String.IsNullOrEmpty(x.TransactionResponse),"Transaction Response should not be empty");
-                Assert.IsTrue(x.GatewayOrderID == gatewayId, "Expected Gateway Order ID");
-
-            });
-            //
-           // Assert.IsFalse(String.IsNullOrEmpty(transactions.First().TransactionResponse),"Transaction Response should not be empty");
-           
-        }
-        public void CreateStandardTestSetup(PaymentTestSetup setup)
-        {
-            setup.OrderInfo = CreateNewOrderInfo();
-            setup.CustomerInfo = CustomerInfoProvider.GetCustomerInfo(setup.OrderInfo.OrderCustomerID);
-            setup.ProfileProvider = new PaymentechProfileProvider();
-            setup.ExistingProfiles = setup.ProfileProvider.GetCustomerPaymentProfiles(setup.CustomerInfo);
-            
-            if (setup.ExistingProfiles.Any())
-                setup.LastProfileID = setup.ExistingProfiles.Max(x => x.ItemID);
-            
-            var newItem = GetNoShippingRequiredOrderItem();
-            newItem.OrderItemOrderID = setup.OrderInfo.OrderID;
-            // Create the order item
-            OrderItemInfoProvider.SetOrderItemInfo(newItem);
-            
-            setup.OrderItems = new List<OrderItemInfo> { newItem };
-            setup.OrderInfo.OrderTotalPrice = setup.OrderItems.Select(x => x.OrderItemUnitPrice * x.OrderItemUnitCount).Sum();
-        }
-        public void CreateShippingTestSetup(PaymentTestSetup setup)
-        {
-            setup.OrderInfo = CreateNewOrderInfo();
-            setup.CustomerInfo = CustomerInfoProvider.GetCustomerInfo(setup.OrderInfo.OrderCustomerID);
-            setup.ProfileProvider = new PaymentechProfileProvider();
-            setup.ExistingProfiles = setup.ProfileProvider.GetCustomerPaymentProfiles(setup.CustomerInfo);
-            if (setup.ExistingProfiles.Any())
-                setup.LastProfileID = setup.ExistingProfiles.Max(x => x.ItemID);
-
-            var newItem = GetShippingRequiredOrderItem();
-            newItem.OrderItemOrderID = setup.OrderInfo.OrderID;
-            // Create the order item
-            OrderItemInfoProvider.SetOrderItemInfo(newItem);
-            
-            setup.OrderItems = new List<OrderItemInfo> { newItem };
-            setup.OrderInfo.OrderTotalPrice = setup.OrderItems.Select(x => x.OrderItemUnitPrice * x.OrderItemUnitCount).Sum();
-        }
-        public void CreateMixedShippingNoShippingTestSetup(PaymentTestSetup setup)
-        {
-            setup.OrderInfo = CreateNewOrderInfo();
-            setup.CustomerInfo = CustomerInfoProvider.GetCustomerInfo(setup.OrderInfo.OrderCustomerID);
-            setup.ProfileProvider = new PaymentechProfileProvider();
-            setup.ExistingProfiles = setup.ProfileProvider.GetCustomerPaymentProfiles(setup.CustomerInfo);
-            if (setup.ExistingProfiles.Any())
-                setup.LastProfileID = setup.ExistingProfiles.Max(x => x.ItemID);
-
-            var shippingItem = GetShippingRequiredOrderItem();
-            shippingItem.OrderItemOrderID = setup.OrderInfo.OrderID;
-
-            var standardItem = GetNoShippingRequiredOrderItem();
-            standardItem.OrderItemOrderID = setup.OrderInfo.OrderID;
-            // Create the order item
-            OrderItemInfoProvider.SetOrderItemInfo(shippingItem);
-            OrderItemInfoProvider.SetOrderItemInfo(standardItem);
-            
-            setup.OrderItems = new List<OrderItemInfo> { shippingItem, standardItem };
-            setup.OrderInfo.OrderTotalPrice = setup.OrderItems.Select(x => x.OrderItemUnitPrice * x.OrderItemUnitCount).Sum();
-
-        }
-        public class PaymentTestSetup
-        {
-            public List<OrderItemInfo> OrderItems { get; set; }
-            public List<PaymentechProfileItem> ExistingProfiles { get; set; }
-
-            public List<PaymentechTransactionItem> TransactionItems { get; set; }
-            public int LastProfileID { get; set; }
-            public PaymentechProfileItem NewProfile { get; set; }    
-            public CustomerInfo CustomerInfo { get; set; }
-            public OrderInfo OrderInfo { get; set; }
-
-            public PaymentechProfileProvider ProfileProvider { get; set; }
-
-            
-            public void PostProcess()
-            {
-                NewProfile = ProfileProvider.GetCustomerPaymentProfiles(CustomerInfo).SingleOrDefault(x => x.ItemID > LastProfileID);
-                var tp = new PaymentechTransactionProvider();
-                TransactionItems = tp.GetOrderTransactionsForOrder(OrderInfo);
-               
-            }
-
-            
-        }
-
-        
+        #region IPaymentechGateway Tests
+     
         #endregion
+
+        #region Exception Tests
+        #endregion
+
+
+
+
     }
 }

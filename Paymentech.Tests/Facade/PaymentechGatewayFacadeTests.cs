@@ -19,6 +19,7 @@ namespace PaymentechGateway.Tests
             settings.Password = ConfigurationManager.AppSettings["password"];
             settings.SandboxGatewayUrl = "https://wsvar.paymentech.net/PaymentechGateway";
             settings.SandboxGatewayFailoverUrl = "https://wsvar2.paymentech.net/PaymentechGateway";
+         
             settings.MerchantId = ConfigurationManager.AppSettings["merchantid"];
             settings.RecurringMerchantId = ConfigurationManager.AppSettings["recurringmerchantid"];
             settings.UseSandbox = true;
@@ -279,6 +280,7 @@ namespace PaymentechGateway.Tests
             Assert.IsTrue(actual.PaymentStatus == PaymentStatus.Captured);
             //target.CaptureAuthPayment()
         }
+
         #endregion
     }
 }

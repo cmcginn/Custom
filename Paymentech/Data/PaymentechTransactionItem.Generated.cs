@@ -42,6 +42,23 @@ namespace CMS.CustomTables.Types
         /// 
         /// </summary>
         [DatabaseField]
+        public double TransactionAmount
+        {
+            get
+            {
+                return ValidationHelper.GetDouble(GetValue("TransactionAmount"), 0);
+            }
+            set
+            {
+                SetValue("TransactionAmount", value);
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DatabaseField]
         public string TransactionRequest
         {
             get

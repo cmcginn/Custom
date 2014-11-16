@@ -12,6 +12,8 @@ namespace CMS.CustomTables.Types
 {
     public class PaymentechProfileProvider
     {
+
+
         public List<PaymentechProfileItem> GetCustomerPaymentProfiles(CustomerInfo customerInfo)
         {
             var result = new List<PaymentechProfileItem>();
@@ -30,6 +32,11 @@ namespace CMS.CustomTables.Types
         }
 
         public void InsertPaymentechProfileItem(PaymentechProfileItem item)
+        {
+            CustomTableItemProvider.SetItem(item);
+        }
+
+        public void UpdatePaymentechProfileItem(PaymentechProfileItem item)
         {
             CustomTableItemProvider.SetItem(item);
         }
